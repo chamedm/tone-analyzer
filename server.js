@@ -1,7 +1,10 @@
 require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;;
+
+const bodyParser = require('body-parser');
 
 const ToneAnalyzerV3 = require('ibm-watson/tone-analyzer/v3');
 const { IamAuthenticator } = require('ibm-watson/auth');
@@ -14,8 +17,14 @@ const toneAnalyzer = new ToneAnalyzerV3({
   serviceUrl: process.env.URL,
 });
 
+
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
+app.use(bodyParser.json());
+
 app.get('/', function (req, res) {
-  res.send('Hello there');
+  res.send('Welcome to the tone analyzer app!');
 });
 
 app.post('/tone', (req, res) => {
@@ -32,13 +41,11 @@ app.post('/tone', (req, res) => {
 
   toneAnalyzer.tone(toneParams)
       .then(toneAnalysis => {
-          result = JSON.stringify(toneAnalysis);
-          console.log(result);
-          res.json(result);
+          result = toneAnalysis;
+          res.send(result);
       })
       .catch(err => {
-          console.log('error:', err);
-          res.send(err);
+        res.send(err);
       });
 });
 
